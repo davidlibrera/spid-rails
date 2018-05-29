@@ -2,10 +2,9 @@
 # al fine di rendere conforme il nodo Issuer alle regole tecniche SPID,
 # (aggiunte righe 32 e 33)
 
-module OneLogin
+module Spid
   module RubySaml
-    class Authrequest
-
+    module Authrequest
       def create_xml_document(settings)
         time = Time.now.utc.strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -29,17 +28,17 @@ module OneLogin
         #NameQualifier e Format da requisiti SPID
         if settings.issuer != nil
           issuer = root.add_element "saml:Issuer",{
-            "NameQualifier" => settings.issuer,
-            "Format" => 'urn:oasis:names:tc:SAML:2.0:nameid-format:entity'
-          }
+                                      "NameQualifier" => settings.issuer,
+                                      "Format" => 'urn:oasis:names:tc:SAML:2.0:nameid-format:entity'
+                                    }
           issuer.text = settings.issuer
         end
         if settings.name_identifier_format != nil
           root.add_element "samlp:NameIDPolicy", {
-              # Might want to make AllowCreate a setting?
-              "AllowCreate" => "true",
-              "Format" => settings.name_identifier_format
-          }
+                             # Might want to make AllowCreate a setting?
+                             "AllowCreate" => "true",
+                             "Format" => settings.name_identifier_format
+                           }
         end
 
         if settings.authn_context || settings.authn_context_decl_ref
@@ -51,8 +50,8 @@ module OneLogin
           end
 
           requested_context = root.add_element "samlp:RequestedAuthnContext", {
-            "Comparison" => comparison,
-          }
+                                                 "Comparison" => comparison,
+                                               }
 
           if settings.authn_context != nil
             authn_contexts_class_ref = settings.authn_context.is_a?(Array) ? settings.authn_context : [settings.authn_context]
@@ -73,7 +72,8 @@ module OneLogin
 
         request_doc
       end
-
     end
   end
 end
+
+OneLogin::RubySaml::Authrequest.include Spid::RubySaml::Authrequest
